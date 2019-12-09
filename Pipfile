@@ -14,7 +14,7 @@ ptvsd = "~=4.3.2"
 line-profiler = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"
 
 [scripts]
 start = "python main.py"

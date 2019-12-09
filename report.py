@@ -86,11 +86,12 @@ def MergeSort(array):
 def merge(left, right):
     integration = []
     left_index, right_index = 0, 0
+    left_length, right_length = len(left), len(right)
     while True:
-        if left_index == len(left):
+        if left_index == left_length:
             integration.extend(right[right_index:])
             break
-        elif right_index == len(right):
+        elif right_index == right_length:
             integration.extend(left[left_index:])
             break
 
@@ -105,10 +106,11 @@ def merge(left, right):
 
 def time(func):
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(array):
         start = perf_counter()
-        result = func(*args, **kwargs)
+        result = func(array)
         end = perf_counter()
+        assert sorted(array) == result
         return end - start
     return wrapper
 
@@ -122,6 +124,7 @@ def main():
             "QuickSort": 0,
             "MergeSort": 0
         }
+
         for _ in range(10):
             array = [randint(-n, n) for _ in range(n)]  # randint(a, b) は a <= n <= b を満たす乱数を生成する
 
