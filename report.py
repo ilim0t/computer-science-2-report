@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import datetime
 # from __future__ import print_function
-import functools
+from functools import wraps
+from math import log
 from random import randint, seed
 from time import perf_counter
 
@@ -23,9 +23,9 @@ def QuickSort(array, start=0, end=None):  # array[start:end]でありarray[end]�
     end = len(array) if end is None else end
     if end - start == 1:
         return array
-    assert 0 <= start
-    assert start < end - 1
-    assert end - 1 < len(array)
+    assert 0 <= start, "start={}が不適切です".format(start)
+    assert start < end - 1, "start={}, end={}が不適切です".format(start, end)
+    assert end - 1 < len(array), "end={}が不適切です".format(end)
 
     pivot = find_pivot(array, start, end)
     if pivot is None:
@@ -42,9 +42,9 @@ def QuickSort(array, start=0, end=None):  # array[start:end]でありarray[end]�
 def find_pivot(array, start=0, end=None):
     # array に対し破壊的
     end = len(array) if end is None else end
-    assert 0 <= start
-    assert start < end - 1
-    assert end - 1 < len(array)
+    assert 0 <= start, "start={}が不適切です".format(start)
+    assert start < end - 1, "start={}, end={}が不適切です".format(start, end)
+    assert end - 1 < len(array), "end={}が不適切です".format(end)
 
     first = array[start]
     for i in range(start + 1, end):  # sliceを使い array[1:] とすると,新しくlistが作られメモリを消費するので,使わない
@@ -57,9 +57,9 @@ def find_pivot(array, start=0, end=None):
 def partition(array, pivot, start=0, end=None):
     # arrayに対し破壊的
     end = len(array) if end is None else end
-    assert 0 <= start
-    assert start < end - 1
-    assert end - 1 < len(array)
+    assert 0 <= start, "start={}が不適切です".format(start)
+    assert start < end - 1, "start={}, end={}が不適切です".format(start, end)
+    assert end - 1 < len(array), "end={}が不適切です".format(end)
 
     left_index, right_index = start, end - 1
 
@@ -105,18 +105,19 @@ def merge(left, right):
 
 
 def time(func):
-    @functools.wraps(func)
+    @wraps(func)
     def wrapper(array):
         start = perf_counter()
         result = func(array)
         end = perf_counter()
-        assert sorted(array) == result
+        assert sorted(array) == result, "{}では正しくsortできていません".format(func.__name__)
         return end - start
     return wrapper
 
 
 def main():
     seed(0)
+    roop_num = 100
 
     for n in [100, 500, 1000]:
         cum_times = {
@@ -125,17 +126,20 @@ def main():
             "MergeSort": 0
         }
 
-        for _ in range(10):
-            array = [randint(-n, n) for _ in range(n)]  # randint(a, b) は a <= n <= b を満たす乱数を生成する
+        for _ in range(roop_num):
+            array = [randint(0, n) for _ in range(n)]  # randint(a, b) は a <= n <= b を満たす乱数を生成する
 
             cum_times["BubbleSort"] += time(BubbleSort)(array[:])
             cum_times["QuickSort"] += time(QuickSort)(array[:])
             cum_times["MergeSort"] += time(MergeSort)(array[:])
 
         print("\nn={}".format(n))
-        print("BubbleSort: {:.3e}[ms]".format(cum_times["BubbleSort"]))
-        print("QuickSort: {:.3e}[ms]".format(cum_times["QuickSort"]))
-        print("MergeSort: {:.3e}[ms]".format(cum_times["MergeSort"]))
+        print("BubbleSort: {:.3e}[ms], {:.3e}[/n^2]"
+              .format(cum_times["BubbleSort"] / roop_num, cum_times["BubbleSort"]/roop_num/(n**2)))
+        print("QuickSort:  {:.3e}[ms], {:.3e}[/(n*logn)]"
+              .format(cum_times["QuickSort"] / roop_num, cum_times["QuickSort"]/roop_num/(n * log(n))))
+        print("MergeSort:  {:.3e}[ms], {:.3e}[/(n*logn)]"
+              .format(cum_times["MergeSort"] / roop_num, cum_times["MergeSort"]/roop_num/(n * log(n))))
 
 
 if __name__ == "__main__":
