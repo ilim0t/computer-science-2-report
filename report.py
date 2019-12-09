@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from random import randint, seed
-from time import perf_counter()
+import datetime
 # from __future__ import print_function
 import functools
-import datetime
+from random import randint, seed
+from time import perf_counter
+
 
 def BubbleSort(array):
     # array に対し破壊的
@@ -101,11 +102,6 @@ def merge(left, right):
             right_index += 1
     return integration
 
-def timer(func, *args, **kwargs):
-    start = perf_counter()()
-    func(*args, **kwargs)
-    end = perf_counter()()
-    return end - start
 
 def time(func):
     @functools.wraps(func)
@@ -121,22 +117,22 @@ def main():
     seed(0)
 
     for n in [100, 500, 1000]:
+        cum_times = {
+            "BubbleSort": 0,
+            "QuickSort": 0,
+            "MergeSort": 0
+        }
         for _ in range(10):
-            array = [randint(INT_RANGE[0], INT_RANGE[1]) for _ in range(N)]
-                sorted1 = BubbleSort(array[:])
-                sorted2 = QuickSort(array[:])
-                sorted3 = MergeSort(array[:])
+            array = [randint(-n, n) for _ in range(n)]  # randint(a, b) は a <= n <= b を満たす乱数を生成する
 
-    INT_RANGE = [-10, 10]  # [a, b] は a <= n <= b を満たす乱数を生成する
+            cum_times["BubbleSort"] += time(BubbleSort)(array[:])
+            cum_times["QuickSort"] += time(QuickSort)(array[:])
+            cum_times["MergeSort"] += time(MergeSort)(array[:])
 
-    for _ in range(1000):
-        sorted1 = BubbleSort(array[:])
-        sorted2 = QuickSort(array[:])
-        sorted3 = MergeSort(array[:])
-
-        assert sorted(array) == sorted1
-        assert sorted1 == sorted2
-        assert sorted2 == sorted3
+        print("\nn={}".format(n))
+        print("BubbleSort: {:.3e}[ms]".format(cum_times["BubbleSort"]))
+        print("QuickSort: {:.3e}[ms]".format(cum_times["QuickSort"]))
+        print("MergeSort: {:.3e}[ms]".format(cum_times["MergeSort"]))
 
 
 if __name__ == "__main__":
