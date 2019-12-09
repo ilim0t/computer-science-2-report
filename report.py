@@ -7,6 +7,8 @@ from math import log
 from random import randint, seed
 from time import perf_counter
 
+import matplotlib.pyplot as plt
+
 
 def BubbleSort(array):
     # array に対し破壊的
@@ -117,30 +119,58 @@ def time(func):
 
 def main():
     seed(0)
-    roop_num = 100
+    roop_num = 10
+    ns = [100, 500, 1000]
+    sorts = {
+        "BubbleSort": BubbleSort,
+        "QuickSort": QuickSort,
+        "MergeSort": MergeSort
+    }
+    result = {
+        "cum_time": {name: [] for name in sorts},
+        "time": {name: [] for name in sorts},
+        "by_complexity": {name: [] for name in sorts}
+    }
 
-    for n in [100, 500, 1000]:
-        cum_times = {
-            "BubbleSort": 0,
-            "QuickSort": 0,
-            "MergeSort": 0
-        }
-
+    for n in ns:
+        for cum_time in result["cum_time"].values():
+            cum_time.append(0)
         for _ in range(roop_num):
             array = [randint(0, n) for _ in range(n)]  # randint(a, b) は a <= n <= b を満たす乱数を生成する
 
-            cum_times["BubbleSort"] += time(BubbleSort)(array[:])
-            cum_times["QuickSort"] += time(QuickSort)(array[:])
-            cum_times["MergeSort"] += time(MergeSort)(array[:])
+            for name, sort_func in sorts.items():
+                result["cum_time"][name][-1] += time(sort_func)(array[:])
+
+        for name, cum_time in result["cum_time"].items():
+            result["time"][name].append(cum_time[-1] / roop_num)
+
+        result["by_complexity"]["BubbleSort"].append(result["time"]["BubbleSort"][-1] / (n ** 2))
+        result["by_complexity"]["QuickSort"].append(result["time"]["QuickSort"][-1] / (n * log(n)))
+        result["by_complexity"]["MergeSort"].append(result["time"]["MergeSort"][-1] / (n * log(n)))
 
         print("\nn={}".format(n))
-        print("BubbleSort: {:.3e}[ms], {:.3e}[/n^2]"
-              .format(cum_times["BubbleSort"] / roop_num, cum_times["BubbleSort"]/roop_num/(n**2)))
-        print("QuickSort:  {:.3e}[ms], {:.3e}[/(n*logn)]"
-              .format(cum_times["QuickSort"] / roop_num, cum_times["QuickSort"]/roop_num/(n * log(n))))
-        print("MergeSort:  {:.3e}[ms], {:.3e}[/(n*logn)]"
-              .format(cum_times["MergeSort"] / roop_num, cum_times["MergeSort"]/roop_num/(n * log(n))))
+        print("BubbleSort: {:.3e}[ms], {:.3e}[/n^2]".format(
+            result["time"]["BubbleSort"][-1], result["by_complexity"]["BubbleSort"][-1]))
+        print("QuickSort:  {:.3e}[ms], {:.3e}[/(n*logn)]".format(
+            result["time"]["QuickSort"][-1], result["by_complexity"]["QuickSort"][-1]))
+        print("MergeSort:  {:.3e}[ms], {:.3e}[/(n*logn)]".format(
+            result["time"]["MergeSort"][-1], result["by_complexity"]["MergeSort"][-1]))
+
+    # width = 1/(len(result["by_complexity"])+1)
+
+    # plt.bar([i + width*0 for i in range(len(ns))], result["by_complexity"]["BubbleSort"],
+    #         color='r', width=width, label='BubbleSort', align="center")
+    # plt.bar([i + width*1 for i in range(len(ns))], result["by_complexity"]["QuickSort"],
+    #         color='g', width=width, label='QuickSort', align="center")
+    # plt.bar([i + width*2 for i in range(len(ns))], result["by_complexity"]["MergeSort"],
+    #         color='b', width=width, label='MergeSort', align="center")
+
+    # plt.legend()
+
+    # plt.xticks([i+width*(len(result["by_complexity"])-1)/2 for i in range(len(ns))], ns)
+    # plt.show()
 
 
 if __name__ == "__main__":
+    # python -O main.py のように -O オプションをつけて実行するとassert文が無視されます
     main()
